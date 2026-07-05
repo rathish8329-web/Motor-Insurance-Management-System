@@ -14,6 +14,8 @@ CREATE TABLE MI_regions (
     Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+desc mi_states
+
 -- create table MI_states
 
 CREATE TABLE MI_states (
@@ -23,6 +25,8 @@ CREATE TABLE MI_states (
     Status VARCHAR(30) DEFAULT 'ACTIVE',
     FOREIGN KEY (region_id) REFERENCES mi_regions(region_id)
 );
+
+desc mi_cities
 
 CREATE TABLE MI_cities (
     city_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -35,6 +39,7 @@ CREATE TABLE MI_cities (
     FOREIGN KEY (state_id) REFERENCES mi_states(state_id)
 );
 
+desc Table mi_branches
 
 CREATE TABLE MI_branches (
     Branch_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -47,6 +52,7 @@ CREATE TABLE MI_branches (
     FOREIGN KEY (city_id) REFERENCES mi_cities(city_id)
 );
 
+desc Table Mi_roles
 
 CREATE TABLE MI_roles (
     Role_id INT AUTO_INCREMENT PRIMARY KEY,
