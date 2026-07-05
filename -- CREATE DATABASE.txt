@@ -1,0 +1,1684 @@
+-- CREATE DATABASE
+
+CREATE DATABASE MOTOR_insurance;
+USE MOTOR_insurance;
+
+-- create table MI_regions
+ 
+CREATE TABLE MI_regions (
+    Region_id INT AUTO_INCREMENT PRIMARY KEY,
+    Region_name VARCHAR(200) NOT NULL UNIQUE,
+    dateofbrith date,
+    phone varbinary(100),
+    Status VARCHAR(30) DEFAULT 'ACTIVE',
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- create table MI_states
+
+CREATE TABLE MI_states (
+    State_id INT AUTO_INCREMENT PRIMARY KEY,
+    Region_id INT NOT NULL,
+    State_name VARCHAR(200) NOT NULL,
+    Status VARCHAR(30) DEFAULT 'ACTIVE',
+    FOREIGN KEY (region_id) REFERENCES mi_regions(region_id)
+);
+
+CREATE TABLE MI_cities (
+    city_id INT AUTO_INCREMENT PRIMARY KEY,
+    state_id INT NOT NULL,
+    city_name VARCHAR(200) NOT NULL,
+    Pincode VARCHAR(30),
+    Address varchar(300),
+    
+    Status VARCHAR(20) DEFAULT 'ACTIVE',
+    FOREIGN KEY (state_id) REFERENCES mi_states(state_id)
+);
+
+
+CREATE TABLE MI_branches (
+    Branch_id INT AUTO_INCREMENT PRIMARY KEY,
+    City_id INT NOT NULL,
+    Branch_name VARCHAR(200) NOT NULL,
+    pincode varchar(50),
+    Branch_code VARCHAR(30) UNIQUE,
+    Address VARCHAR(255),
+    Status VARCHAR(20) DEFAULT 'ACTIVE',
+    FOREIGN KEY (city_id) REFERENCES mi_cities(city_id)
+);
+
+
+CREATE TABLE MI_roles (
+    Role_id INT AUTO_INCREMENT PRIMARY KEY,
+    Role_name VARCHAR(50) UNIQUE NOT NULL,
+    Role_type varchar(30),
+    Status VARCHAR(20) DEFAULT 'ACTIVE'
+);
+
+-- create table MI_USER
+CREATE TABLE MI_users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    branch_id INT NOT NULL,
+    role_id INT NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    full_name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    mobile VARCHAR(15),
+    status VARCHAR(20) DEFAULT 'ACTIVE',
+    FOREIGN KEY (branch_id) REFERENCES mi_branches(branch_id),
+    FOREIGN KEY (role_id) REFERENCES mi_roles(role_id)
+);
+
+
+CREATE TABLE MI_CUSTOMERS (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL,
+    gender VARCHAR(10),
+    dob DATE,
+    mobile VARCHAR(15) UNIQUE,
+    email VARCHAR(209) UNIQUE,
+    address VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE mi_vehicles (
+    vehicle_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    registration_no VARCHAR(20) UNIQUE NOT NULL,
+    make VARCHAR(50),
+    model VARCHAR(50),
+    manufacturing_year YEAR,
+    engine_no VARCHAR(50) UNIQUE,
+    chassis_no VARCHAR(50) UNIQUE,
+    FOREIGN KEY (customer_id) REFERENCES mi_customers(customer_id)
+);
+
+
+CREATE TABLE mi_quotes (
+    quote_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    vehicle_id INT NOT NULL,
+    quote_date DATE,
+    premium_amount DECIMAL(12,2),
+    quote_status VARCHAR(20) DEFAULT 'PENDING',
+    FOREIGN KEY (customer_id) REFERENCES mi_customers(customer_id),
+    FOREIGN KEY (vehicle_id) REFERENCES mi_vehicles(vehicle_id)
+);
+
+CREATE TABLE mi_policies (
+    policy_id INT AUTO_INCREMENT PRIMARY KEY,
+    quote_id INT NOT NULL,
+    policy_number VARCHAR(50) UNIQUE NOT NULL,
+    issue_date DATE,
+    start_date DATE,
+    end_date DATE,
+    premium_amount DECIMAL(12,2),
+    sum_insured DECIMAL(15,2),
+    policy_status VARCHAR(20) DEFAULT 'ACTIVE',
+    FOREIGN KEY (quote_id) REFERENCES mi_quotes(quote_id)
+);
+
+CREATE TABLE mi_payments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    policy_id INT NOT NULL,
+    payment_date DATE,
+    amount DECIMAL(12,2),
+    payment_mode VARCHAR(30),
+    transaction_no VARCHAR(100) UNIQUE,
+    FOREIGN KEY (policy_id) REFERENCES mi_policies(policy_id)
+);
+
+
+CREATE TABLE mi_claims (
+    claim_id INT AUTO_INCREMENT PRIMARY KEY,
+    policy_id INT NOT NULL,
+    claim_date DATE,
+    claim_amount DECIMAL(12,2),
+    approved_amount DECIMAL(12,2),
+    claim_status VARCHAR(20) DEFAULT 'PENDING',
+    FOREIGN KEY (policy_id) REFERENCES mi_policies(policy_id)
+);
+
+
+CREATE TABLE mi_surveyors (
+    surveyor_id INT AUTO_INCREMENT PRIMARY KEY,
+    surveyor_name VARCHAR(10) NOT NULL,
+    mobile VARCHAR(15),
+    email VARCHAR(100),
+    license_no VARCHAR(50) UNIQUE
+);
+
+
+CREATE TABLE mi_renewals (
+    renewal_id INT AUTO_INCREMENT PRIMARY KEY,
+    policy_id INT NOT NULL,
+    renewal_date DATE,
+    new_expiry_date DATE,
+    renewal_status VARCHAR(20) DEFAULT 'PENDING',
+    FOREIGN KEY (policy_id) REFERENCES mi_policies(policy_id)
+);
+
+
+CREATE TABLE mi_audit_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    table_name VARCHAR(100),
+    action_type VARCHAR(20),
+    action_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_name VARCHAR(100),
+    remarks VARCHAR(255)
+);
+
+
+INSERT INTO mi_regions (region_name, status) VALUES
+('South India','ACTIVE'),
+('North India','ACTIVE'),
+('East India','ACTIVE'),
+('West India','ACTIVE'),
+('Central India','ACTIVE'),
+('South Zone A','ACTIVE'),
+('South Zone B','ACTIVE'),
+('North Zone A','ACTIVE'),
+('North Zone B','ACTIVE'),
+('East Zone A','ACTIVE'),
+('East Zone B','ACTIVE'),
+('West Zone A','ACTIVE'),
+('West Zone B','ACTIVE'),
+('Central Zone A','ACTIVE'),
+('Central Zone B','ACTIVE'),
+('Coastal Region','ACTIVE'),
+('Hill Region','ACTIVE'),
+('Metro Region','ACTIVE'),
+('Rural Region','ACTIVE'),
+('Special Region','ACTIVE');
+
+-- Then mi_states (20 records):
+
+INSERT INTO mi_states (region_id, state_name, status) VALUES
+(1,'Tamil Nadu','ACTIVE'),
+(1,'Kerala','ACTIVE'),
+(2,'Delhi','ACTIVE'),
+(2,'Punjab','ACTIVE'),
+(3,'West Bengal','ACTIVE'),
+(3,'Odisha','ACTIVE'),
+(4,'Maharashtra','ACTIVE'),
+(4,'Gujarat','ACTIVE'),
+(5,'Madhya Pradesh','ACTIVE'),
+(5,'Chhattisgarh','ACTIVE'),
+(6,'Andhra Pradesh','ACTIVE'),
+(6,'Telangana','ACTIVE'),
+(7,'Karnataka','ACTIVE'),
+(8,'Haryana','ACTIVE'),
+(9,'Uttar Pradesh','ACTIVE'),
+(10,'Bihar','ACTIVE'),
+(11,'Jharkhand','ACTIVE'),
+(12,'Rajasthan','ACTIVE'),
+(13,'Goa','ACTIVE'),
+(14,'Assam','ACTIVE');
+
+
+INSERT INTO mi_cities(state_id,city_name,pincode,status) VALUES
+(1,'Chennai','600001','ACTIVE'),
+(1,'Coimbatore','641001','ACTIVE'),
+(2,'Kochi','682001','ACTIVE'),
+(2,'Thiruvananthapuram','695001','ACTIVE'),
+(3,'New Delhi','110001','ACTIVE'),
+(4,'Amritsar','143001','ACTIVE'),
+(5,'Kolkata','700001','ACTIVE'),
+(6,'Bhubaneswar','751001','ACTIVE'),
+(7,'Mumbai','400001','ACTIVE'),
+(8,'Ahmedabad','380001','ACTIVE'),
+(9,'Bhopal','462001','ACTIVE'),
+(10,'Raipur','492001','ACTIVE'),
+(11,'Visakhapatnam','530001','ACTIVE'),
+(12,'Hyderabad','500001','ACTIVE'),
+(13,'Bangalore','560001','ACTIVE'),
+(14,'Gurgaon','122001','ACTIVE'),
+(15,'Lucknow','226001','ACTIVE'),
+(16,'Patna','800001','ACTIVE'),
+(17,'Ranchi','834001','ACTIVE'),
+(18,'Jaipur','302001','ACTIVE');
+
+-- mi_branches (20 Records)
+
+INSERT INTO mi_branches(city_id,branch_name,branch_code,address,status) VALUES
+(1,'Chennai Branch','BR001','Anna Salai','ACTIVE'),
+(2,'Coimbatore Branch','BR002','Avinashi Road','ACTIVE'),
+(3,'Kochi Branch','BR003','MG Road','ACTIVE'),
+(4,'TVM Branch','BR004','Statue Road','ACTIVE'),
+(5,'Delhi Branch','BR005','Connaught Place','ACTIVE'),
+(6,'Amritsar Branch','BR006','Hall Road','ACTIVE'),
+(7,'Kolkata Branch','BR007','Park Street','ACTIVE'),
+(8,'Bhubaneswar Branch','BR008','Janpath','ACTIVE'),
+(9,'Mumbai Branch','BR009','Andheri East','ACTIVE'),
+(10,'Ahmedabad Branch','BR010','CG Road','ACTIVE'),
+(11,'Bhopal Branch','BR011','MP Nagar','ACTIVE'),
+(12,'Raipur Branch','BR012','GE Road','ACTIVE'),
+(13,'Vizag Branch','BR013','Beach Road','ACTIVE'),
+(14,'Hyderabad Branch','BR014','Banjara Hills','ACTIVE'),
+(15,'Bangalore Branch','BR015','MG Road','ACTIVE'),
+(16,'Gurgaon Branch','BR016','Cyber City','ACTIVE'),
+(17,'Lucknow Branch','BR017','Hazratganj','ACTIVE'),
+(18,'Patna Branch','BR018','Fraser Road','ACTIVE'),
+(19,'Ranchi Branch','BR019','Main Road','ACTIVE'),
+(20,'Jaipur Branch','BR020','MI Road','ACTIVE');
+
+-- mi_roles (20 Records)
+
+INSERT INTO mi_roles(role_name,status) VALUES
+('Admin','ACTIVE'),
+('Branch Manager','ACTIVE'),
+('Agent','ACTIVE'),
+('Claim Officer','ACTIVE'),
+('Customer Support','ACTIVE'),
+('Regional Manager','ACTIVE'),
+('Surveyor','ACTIVE'),
+('Auditor','ACTIVE'),
+('Finance Executive','ACTIVE'),
+('Underwriter','ACTIVE'),
+('Sales Executive','ACTIVE'),
+('Operations Manager','ACTIVE'),
+('Policy Issuer','ACTIVE'),
+('Renewal Officer','ACTIVE'),
+('IT Support','ACTIVE'),
+('HR Executive','ACTIVE'),
+('Compliance Officer','ACTIVE'),
+('Data Analyst','ACTIVE'),
+('Risk Manager','ACTIVE'),
+('Supervisor','ACTIVE');
+
+
+-- mi_users (20 Records)
+
+INSERT INTO mi_users
+(branch_id,role_id,username,password,full_name,email,mobile,status)
+VALUES
+(1,1,'admin01','admin123','User One','user1@gmail.com','9000000001','ACTIVE'),
+(2,2,'manager01','manager123','User Two','user2@gmail.com','9000000002','ACTIVE'),
+(3,3,'agent01','agent123','User Three','user3@gmail.com','9000000003','ACTIVE'),
+(4,4,'claim01','claim123','User Four','user4@gmail.com','9000000004','ACTIVE'),
+(5,5,'support01','support123','User Five','user5@gmail.com','9000000005','ACTIVE'),
+(6,6,'rm01','rm123','User Six','user6@gmail.com','9000000006','ACTIVE'),
+(7,7,'survey01','survey123','User Seven','user7@gmail.com','9000000007','ACTIVE'),
+(8,8,'audit01','audit123','User Eight','user8@gmail.com','9000000008','ACTIVE'),
+(9,9,'finance01','finance123','User Nine','user9@gmail.com','9000000009','ACTIVE'),
+(10,10,'under01','under123','User Ten','user10@gmail.com','9000000010','ACTIVE'),
+(11,11,'sales01','sales123','User Eleven','user11@gmail.com','9000000011','ACTIVE'),
+(12,12,'ops01','ops123','User Twelve','user12@gmail.com','9000000012','ACTIVE'),
+(13,13,'policy01','policy123','User Thirteen','user13@gmail.com','9000000013','ACTIVE'),
+(14,14,'renew01','renew123','User Fourteen','user14@gmail.com','9000000014','ACTIVE'),
+(15,15,'it01','it123','User Fifteen','user15@gmail.com','9000000015','ACTIVE'),
+(16,16,'hr01','hr123','User Sixteen','user16@gmail.com','9000000016','ACTIVE'),
+(17,17,'comp01','comp123','User Seventeen','user17@gmail.com','9000000017','ACTIVE'),
+(18,18,'data01','data123','User Eighteen','user18@gmail.com','9000000018','ACTIVE'),
+(19,19,'risk01','risk123','User Nineteen','user19@gmail.com','9000000019','ACTIVE'),
+(20,20,'super01','super123','User Twenty','user20@gmail.com','9000000020','ACTIVE');
+
+INSERT INTO mi_customers
+(customer_name,gender,dob,mobile,email,address)
+VALUES
+('Vijay Kumar','Male','1990-01-10','9000000101','cust1@gmail.com','Chennai'),
+('Priya Sharma','Female','1991-02-11','9000000102','cust2@gmail.com','Coimbatore'),
+('Rahul Singh','Male','1992-03-12','9000000103','cust3@gmail.com','Kochi'),
+('Anjali Devi','Female','1993-04-13','9000000104','cust4@gmail.com','Delhi'),
+('Karthik Raj','Male','1994-05-14','9000000105','cust5@gmail.com','Mumbai'),
+('Arun Kumar','Male','1995-06-15','9000000106','cust6@gmail.com','Bangalore'),
+('Meena Rani','Female','1996-07-16','9000000107','cust7@gmail.com','Hyderabad'),
+('Suresh Babu','Male','1990-08-17','9000000108','cust8@gmail.com','Ahmedabad'),
+('Lakshmi Devi','Female','1991-09-18','9000000109','cust9@gmail.com','Jaipur'),
+('Prakash M','Male','1992-10-19','9000000110','cust10@gmail.com','Patna'),
+('Ajay Kumar','Male','1993-11-20','9000000111','cust11@gmail.com','Lucknow'),
+('Divya S','Female','1994-12-21','9000000112','cust12@gmail.com','Ranchi'),
+('Vignesh S','Male','1995-01-22','9000000113','cust13@gmail.com','Bhopal'),
+('Nisha R','Female','1996-02-23','9000000114','cust14@gmail.com','Raipur'),
+('Ravi K','Male','1990-03-24','9000000115','cust15@gmail.com','Vizag'),
+('Keerthi P','Female','1991-04-25','9000000116','cust16@gmail.com','Gurgaon'),
+('Mohan R','Male','1992-05-26','9000000117','cust17@gmail.com','Kolkata'),
+('Sneha D','Female','1993-06-27','9000000118','cust18@gmail.com','Amritsar'),
+('Ganesh T','Male','1994-07-28','9000000119','cust19@gmail.com','Bhubaneswar'),
+('Pooja M','Female','1995-08-29','9000000120','cust20@gmail.com','Chennai');
+
+-- mi_vehicles (20 Records)
+
+INSERT INTO mi_vehicles
+(customer_id,registration_no,make,model,manufacturing_year,engine_no,chassis_no)
+VALUES
+(1,'TN01AA1001','Hyundai','i20',2022,'ENG1001','CHS1001'),
+(2,'TN02AA1002','Honda','City',2021,'ENG1002','CHS1002'),
+(3,'KL01AA1003','Toyota','Innova',2023,'ENG1003','CHS1003'),
+(4,'DL01AA1004','Tata','Nexon',2022,'ENG1004','CHS1004'),
+(5,'MH01AA1005','Kia','Seltos',2024,'ENG1005','CHS1005'),
+(6,'KA01AA1006','Maruti','Swift',2021,'ENG1006','CHS1006'),
+(7,'TS01AA1007','Mahindra','XUV300',2022,'ENG1007','CHS1007'),
+(8,'GJ01AA1008','Hyundai','Creta',2023,'ENG1008','CHS1008'),
+(9,'RJ01AA1009','Honda','Amaze',2021,'ENG1009','CHS1009'),
+(10,'BR01AA1010','Toyota','Glanza',2022,'ENG1010','CHS1010'),
+(11,'UP01AA1011','Tata','Punch',2024,'ENG1011','CHS1011'),
+(12,'JH01AA1012','Kia','Sonet',2023,'ENG1012','CHS1012'),
+(13,'MP01AA1013','Maruti','Baleno',2022,'ENG1013','CHS1013'),
+(14,'CG01AA1014','Mahindra','Scorpio',2024,'ENG1014','CHS1014'),
+(15,'AP01AA1015','Toyota','Fortuner',2023,'ENG1015','CHS1015'),
+(16,'HR01AA1016','Hyundai','Venue',2022,'ENG1016','CHS1016'),
+(17,'WB01AA1017','Honda','Elevate',2024,'ENG1017','CHS1017'),
+(18,'PB01AA1018','Tata','Harrier',2023,'ENG1018','CHS1018'),
+(19,'OD01AA1019','Kia','Carens',2024,'ENG1019','CHS1019'),
+(20,'TN03AA1020','Maruti','Brezza',2023,'ENG1020','CHS1020');
+
+-- mi_quotes (20 Records)
+
+INSERT INTO mi_quotes
+(customer_id,vehicle_id,quote_date,premium_amount,quote_status)
+VALUES
+(1,1,'2026-07-01',12000,'APPROVED'),
+(2,2,'2026-07-01',13000,'APPROVED'),
+(3,3,'2026-07-01',14000,'APPROVED'),
+(4,4,'2026-07-01',15000,'APPROVED'),
+(5,5,'2026-07-01',16000,'APPROVED'),
+(6,6,'2026-07-01',17000,'APPROVED'),
+(7,7,'2026-07-01',18000,'APPROVED'),
+(8,8,'2026-07-01',19000,'APPROVED'),
+(9,9,'2026-07-01',20000,'APPROVED'),
+(10,10,'2026-07-01',21000,'APPROVED'),
+(11,11,'2026-07-01',22000,'APPROVED'),
+(12,12,'2026-07-01',23000,'APPROVED'),
+(13,13,'2026-07-01',24000,'APPROVED'),
+(14,14,'2026-07-01',25000,'APPROVED'),
+(15,15,'2026-07-01',26000,'APPROVED'),
+(16,16,'2026-07-01',27000,'APPROVED'),
+(17,17,'2026-07-01',28000,'APPROVED'),
+(18,18,'2026-07-01',29000,'APPROVED'),
+(19,19,'2026-07-01',30000,'APPROVED'),
+(20,20,'2026-07-01',31000,'APPROVED');
+
+-- mi_policies (20 Records)
+
+INSERT INTO mi_policies
+(quote_id,policy_number,issue_date,start_date,end_date,premium_amount,sum_insured,policy_status)
+VALUES
+(1,'POL20260001','2026-07-01','2026-07-01','2027-06-30',12000,500000,'ACTIVE'),
+(2,'POL20260002','2026-07-01','2026-07-01','2027-06-30',13000,550000,'ACTIVE'),
+(3,'POL20260003','2026-07-01','2026-07-01','2027-06-30',14000,600000,'ACTIVE'),
+(4,'POL20260004','2026-07-01','2026-07-01','2027-06-30',15000,650000,'ACTIVE'),
+(5,'POL20260005','2026-07-01','2026-07-01','2027-06-30',16000,700000,'ACTIVE'),
+(6,'POL20260006','2026-07-01','2026-07-01','2027-06-30',17000,750000,'ACTIVE'),
+(7,'POL20260007','2026-07-01','2026-07-01','2027-06-30',18000,800000,'ACTIVE'),
+(8,'POL20260008','2026-07-01','2026-07-01','2027-06-30',19000,850000,'ACTIVE'),
+(9,'POL20260009','2026-07-01','2026-07-01','2027-06-30',20000,900000,'ACTIVE'),
+(10,'POL20260010','2026-07-01','2026-07-01','2027-06-30',21000,950000,'ACTIVE'),
+(11,'POL20260011','2026-07-01','2026-07-01','2027-06-30',22000,1000000,'ACTIVE'),
+(12,'POL20260012','2026-07-01','2026-07-01','2027-06-30',23000,1050000,'ACTIVE'),
+(13,'POL20260013','2026-07-01','2026-07-01','2027-06-30',24000,1100000,'ACTIVE'),
+(14,'POL20260014','2026-07-01','2026-07-01','2027-06-30',25000,1150000,'ACTIVE'),
+(15,'POL20260015','2026-07-01','2026-07-01','2027-06-30',26000,1200000,'ACTIVE'),
+(16,'POL20260016','2026-07-01','2026-07-01','2027-06-30',27000,1250000,'ACTIVE'),
+(17,'POL20260017','2026-07-01','2026-07-01','2027-06-30',28000,1300000,'ACTIVE'),
+(18,'POL20260018','2026-07-01','2026-07-01','2027-06-30',29000,1350000,'ACTIVE'),
+(19,'POL20260019','2026-07-01','2026-07-01','2027-06-30',30000,1400000,'ACTIVE'),
+(20,'POL20260020','2026-07-01','2026-07-01','2027-06-30',31000,1450000,'ACTIVE');
+
+
+INSERT INTO mi_payments
+(policy_id,payment_date,amount,payment_mode,transaction_no)
+VALUES
+(1,'2026-07-01',12000,'UPI','TXN1001'),
+(2,'2026-07-01',13000,'CARD','TXN1002'),
+(3,'2026-07-01',14000,'NETBANKING','TXN1003'),
+(4,'2026-07-01',15000,'UPI','TXN1004'),
+(5,'2026-07-01',16000,'CARD','TXN1005'),
+(6,'2026-07-01',17000,'UPI','TXN1006'),
+(7,'2026-07-01',18000,'CARD','TXN1007'),
+(8,'2026-07-01',19000,'NETBANKING','TXN1008'),
+(9,'2026-07-01',20000,'UPI','TXN1009'),
+(10,'2026-07-01',21000,'CARD','TXN1010'),
+(11,'2026-07-01',22000,'UPI','TXN1011'),
+(12,'2026-07-01',23000,'CARD','TXN1012'),
+(13,'2026-07-01',24000,'NETBANKING','TXN1013'),
+(14,'2026-07-01',25000,'UPI','TXN1014'),
+(15,'2026-07-01',26000,'CARD','TXN1015'),
+(16,'2026-07-01',27000,'UPI','TXN1016'),
+(17,'2026-07-01',28000,'CARD','TXN1017'),
+(18,'2026-07-01',29000,'NETBANKING','TXN1018'),
+(19,'2026-07-01',30000,'UPI','TXN1019'),
+(20,'2026-07-01',31000,'CARD','TXN1020');
+
+
+-- mi_claims (20 Records)
+
+INSERT INTO mi_claims
+(policy_id,claim_date,claim_amount,approved_amount,claim_status)
+VALUES
+(1,'2026-08-01',50000,45000,'APPROVED'),
+(2,'2026-08-02',55000,50000,'APPROVED'),
+(3,'2026-08-03',60000,55000,'APPROVED'),
+(4,'2026-08-04',65000,60000,'APPROVED'),
+(5,'2026-08-05',70000,65000,'APPROVED'),
+(6,'2026-08-06',75000,70000,'APPROVED'),
+(7,'2026-08-07',80000,75000,'APPROVED'),
+(8,'2026-08-08',85000,80000,'APPROVED'),
+(9,'2026-08-09',90000,85000,'APPROVED'),
+(10,'2026-08-10',95000,90000,'APPROVED'),
+(11,'2026-08-11',100000,95000,'APPROVED'),
+(12,'2026-08-12',105000,100000,'APPROVED'),
+(13,'2026-08-13',110000,105000,'APPROVED'),
+(14,'2026-08-14',115000,110000,'APPROVED'),
+(15,'2026-08-15',120000,115000,'APPROVED'),
+(16,'2026-08-16',125000,120000,'APPROVED'),
+(17,'2026-08-17',130000,125000,'APPROVED'),
+(18,'2026-08-18',135000,130000,'APPROVED'),
+(19,'2026-08-19',140000,135000,'APPROVED'),
+(20,'2026-08-20',145000,140000,'APPROVED');
+
+-- mi_surveyors (20 Records)
+
+
+INSERT INTO mi_surveyors
+(surveyor_name,mobile,email,license_no)
+VALUES
+('Surveyor 1','9888800001','sur1@gmail.com','LIC001'),
+('Surveyor 2','9888800002','sur2@gmail.com','LIC002'),
+('Surveyor 3','9888800003','sur3@gmail.com','LIC003'),
+('Surveyor 4','9888800004','sur4@gmail.com','LIC004'),
+('Surveyor 5','9888800005','sur5@gmail.com','LIC005'),
+('Surveyor 6','9888800006','sur6@gmail.com','LIC006'),
+('Surveyor 7','9888800007','sur7@gmail.com','LIC007'),
+('Surveyor 8','9888800008','sur8@gmail.com','LIC008'),
+('Surveyor 9','9888800009','sur9@gmail.com','LIC009'),
+('Surveyor 10','9888800010','sur10@gmail.com','LIC010'),
+('Surveyor 11','9888800011','sur11@gmail.com','LIC011'),
+('Surveyor 12','9888800012','sur12@gmail.com','LIC012'),
+('Surveyor 13','9888800013','sur13@gmail.com','LIC013'),
+('Surveyor 14','9888800014','sur14@gmail.com','LIC014'),
+('Surveyor 15','9888800015','sur15@gmail.com','LIC015'),
+('Surveyor 16','9888800016','sur16@gmail.com','LIC016'),
+('Surveyor 17','9888800017','sur17@gmail.com','LIC017'),
+('Surveyor 18','9888800018','sur18@gmail.com','LIC018'),
+('Surveyor 19','9888800019','sur19@gmail.com','LIC019'),
+('Surveyor 20','9888800020','sur20@gmail.com','LIC020');
+
+
+-- mi_renewals (20 Records)
+
+INSERT INTO mi_renewals
+(policy_id,renewal_date,new_expiry_date,renewal_status)
+VALUES
+(1,'2027-06-25','2028-06-30','RENEWED'),
+(2,'2027-06-25','2028-06-30','RENEWED'),
+(3,'2027-06-25','2028-06-30','RENEWED'),
+(4,'2027-06-25','2028-06-30','RENEWED'),
+(5,'2027-06-25','2028-06-30','RENEWED'),
+(6,'2027-06-25','2028-06-30','RENEWED'),
+(7,'2027-06-25','2028-06-30','RENEWED'),
+(8,'2027-06-25','2028-06-30','RENEWED'),
+(9,'2027-06-25','2028-06-30','RENEWED'),
+(10,'2027-06-25','2028-06-30','RENEWED'),
+(11,'2027-06-25','2028-06-30','RENEWED'),
+(12,'2027-06-25','2028-06-30','RENEWED'),
+(13,'2027-06-25','2028-06-30','RENEWED'),
+(14,'2027-06-25','2028-06-30','RENEWED'),
+(15,'2027-06-25','2028-06-30','RENEWED'),
+(16,'2027-06-25','2028-06-30','RENEWED'),
+(17,'2027-06-25','2028-06-30','RENEWED'),
+(18,'2027-06-25','2028-06-30','RENEWED'),
+(19,'2027-06-25','2028-06-30','RENEWED'),
+(20,'2027-06-25','2028-06-30','RENEWED');
+
+-- mi_audit_logs (20 Records)
+
+INSERT INTO mi_audit_logs
+(table_name,action_type,user_name,remarks)
+VALUES
+
+('mi_customers','INSERT','admin01','Customer Added'),
+('mi_vehicles','INSERT','admin01','Vehicle Added'),
+('mi_quotes','INSERT','agent01','Quote Generated'),
+('mi_policies','INSERT','manager01','Policy Issued'),
+('mi_payments','INSERT','finance01','Payment Received'),
+('mi_claims','UPDATE','claim01','Claim Approved'),
+('mi_customers','UPDATE','admin01','Customer Updated'),
+('mi_vehicles','UPDATE','admin01','Vehicle Updated'),
+('mi_quotes','UPDATE','agent01','Quote Approved'),
+('mi_policies','UPDATE','manager01','Policy Modified'),
+('mi_payments','UPDATE','finance01','Payment Verified'),
+('mi_claims','INSERT','claim01','Claim Registered'),
+('mi_renewals','INSERT','renew01','Renewal Created'),
+('mi_renewals','UPDATE','renew01','Renewal Approved'),
+('mi_users','INSERT','admin01','User Added'),
+('mi_users','UPDATE','admin01','User Updated'),
+('mi_branches','INSERT','admin01','Branch Added'),
+('mi_branches','UPDATE','admin01','Branch Updated'),
+('mi_roles','INSERT','admin01','Role Added'),
+('mi_roles','UPDATE','admin01','Role Updated');
+
+SELECT * FROM mi_customers;
+
+SELECT * FROM mi_policies
+WHERE policy_status='ACTIVE';
+
+SELECT customer_name,email
+FROM mi_customers;
+
+SELECT *
+FROM mi_claims
+WHERE claim_amount > 100000;
+
+
+-- Aggregate Functions
+
+SELECT COUNT(*) AS total_customers
+FROM mi_customers;
+
+SELECT SUM(premium_amount) AS total_premium
+FROM mi_policies;
+
+SELECT AVG(claim_amount) AS avg_claim
+FROM mi_claims;
+
+SELECT MAX(sum_insured) AS highest_sum_insured
+FROM mi_policies;
+
+SELECT MIN(premium_amount) AS lowest_premium
+FROM mi_policies;
+
+-- Joins
+
+SELECT c.customer_name,
+       v.registration_no,
+       v.make,
+       v.model
+FROM mi_customers c
+INNER JOIN mi_vehicles v
+ON c.customer_id = v.customer_id;
+SELECT p.policy_number,
+       c.customer_name,
+       q.premium_amount
+FROM mi_policies p
+INNER JOIN mi_quotes q
+ON p.quote_id=q.quote_id
+INNER JOIN mi_customers c
+ON q.customer_id=c.customer_id;
+
+-- Subqueries
+
+SELECT *
+FROM mi_policies
+WHERE premium_amount >
+(
+ SELECT AVG(premium_amount)
+ FROM mi_policies
+);
+
+-- View
+
+CREATE VIEW vw_policy_details AS
+SELECT p.policy_number,
+       c.customer_name,
+       p.premium_amount,
+       p.sum_insured
+FROM mi_policies p
+JOIN mi_quotes q
+ON p.quote_id=q.quote_id
+JOIN mi_customers c
+ON q.customer_id=c.customer_id;
+
+Stored Procedure
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_policy_count()
+BEGIN
+   SELECT COUNT(*) AS total_policies
+   FROM mi_policies;
+END $$
+
+DELIMITER ;
+
+-- Execute:
+
+CALL sp_policy_count();
+
+Trigger
+
+DELIMITER $$
+
+CREATE TRIGGER trg_customer_insert
+AFTER INSERT
+ON mi_customers
+FOR EACH ROW
+BEGIN
+   INSERT INTO mi_audit_logs
+   (table_name,action_type,user_name,remarks)
+   VALUES
+   ('mi_customers','INSERT','SYSTEM','Customer Added');
+END $$
+
+DELIMITER ;
+
+-- Index
+
+CREATE INDEX idx_customer_mobile
+ON mi_customers(mobile);
+
+-- Transaction
+
+START TRANSACTION;
+
+UPDATE mi_policies
+SET premium_amount = premium_amount + 1000
+WHERE policy_id = 1;
+
+
+COMMIT;
+
+-- Window Function
+
+SELECT policy_id,
+       premium_amount,
+       ROW_NUMBER() OVER
+       (ORDER BY premium_amount DESC) AS ranking
+FROM mi_policies;
+
+
+-- First 5 customers
+
+
+SELECT * FROM mi_customers
+LIMIT 5;
+
+-- First 10 policies
+
+SELECT * FROM mi_policies
+LIMIT 10;
+
+-- OFFSET Queries
+
+-- Skip first 5 customers and show next 5
+
+SELECT * FROM mi_customers
+LIMIT 5 OFFSET 5;
+
+-- Skip first 10 policies and show next 5
+
+SELECT * FROM mi_policies
+LIMIT 5 OFFSET 10;
+
+-- Aggregate Function Queries
+
+-- Total customers
+
+SELECT COUNT(*) AS total_customers
+FROM mi_customers;
+
+-- Total premium collected
+
+SELECT SUM(premium_amount) AS total_premium
+FROM mi_policies;
+
+-- Average premium amount
+
+SELECT AVG(premium_amount) AS avg_premium
+FROM mi_policies;
+
+-- Highest claim amount
+
+SELECT MAX(claim_amount) AS highest_claim
+FROM mi_claims;
+
+-- Lowest premium amount
+
+SELECT MIN(premium_amount) AS lowest_premium
+FROM mi_policies;
+
+-- JOIN Queries
+
+-- INNER JOIN
+
+
+SELECT c.customer_name,
+       v.registration_no,
+       v.make,
+       v.model
+FROM mi_customers c
+INNER JOIN mi_vehicles v
+ON c.customer_id = v.customer_id;
+
+-- Three Table Join
+
+SELECT c.customer_name,
+       p.policy_number,
+       p.premium_amount
+FROM mi_customers c
+INNER JOIN mi_quotes q
+ON c.customer_id = q.customer_id
+INNER JOIN mi_policies p
+ON q.quote_id = p.quote_id;
+
+-- Four Table Join
+
+SELECT c.customer_name,
+       v.registration_no,
+       p.policy_number,
+       pay.amount
+FROM mi_customers c
+JOIN mi_vehicles v
+ON c.customer_id=v.customer_id
+JOIN mi_quotes q
+ON c.customer_id=q.customer_id
+JOIN mi_policies p
+ON q.quote_id=p.quote_id
+JOIN mi_payments pay
+ON p.policy_id=pay.policy_id;
+
+-- Subqueries
+
+-- Premium greater than average premium
+
+SELECT *
+FROM mi_policies
+WHERE premium_amount >
+(
+   SELECT AVG(premium_amount)
+   FROM mi_policies
+);
+
+-- Customers having policies
+
+SELECT customer_name
+FROM mi_customers
+WHERE customer_id IN
+(
+   SELECT customer_id
+   FROM mi_quotes
+);
+
+-- Highest premium policy
+
+SELECT *
+FROM mi_policies
+WHERE premium_amount =
+(
+   SELECT MAX(premium_amount)
+   FROM mi_policies
+);
+
+-- Claims above average claim amount
+
+SELECT *
+FROM mi_claims
+WHERE claim_amount >
+(
+   SELECT AVG(claim_amount)
+   FROM mi_claims
+);
+
+-- Policies with sum insured greater than average
+
+SELECT *
+FROM mi_policies
+WHERE sum_insured >
+(
+   SELECT AVG(sum_insured)
+   FROM mi_policies
+);
+
+-- procedure
+
+-- 1. Get All Customers
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_get_customers()
+BEGIN
+    SELECT * FROM mi_customers;
+END $$
+
+DELIMITER ;
+
+-- 2. Get All Policies
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_get_policies()
+BEGIN
+    SELECT * FROM mi_policies;
+END $$
+
+DELIMITER ;
+
+-- 3. Get Customer By ID
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_customer_by_id(IN p_customer_id INT)
+BEGIN
+    SELECT * 
+    FROM mi_customers
+    WHERE customer_id = p_customer_id;
+END $$
+
+DELIMITER ;
+
+-- 4. Get Policy By Number
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_policy_by_number(IN p_policy_no VARCHAR(50))
+BEGIN
+    SELECT *
+    FROM mi_policies
+    WHERE policy_number = p_policy_no;
+END $$
+
+DELIMITER ;
+
+-- 5. Total Customers
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_total_customers()
+BEGIN
+    SELECT COUNT(*) AS total_customers
+    FROM mi_customers;
+END $$
+
+DELIMITER ;
+
+
+-- 6. Total Premium
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_total_premium()
+BEGIN
+    SELECT SUM(premium_amount) total_premium
+    FROM mi_policies;
+END $$
+
+DELIMITER ;
+
+-- 7. Active Policies
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_active_policies()
+BEGIN
+    SELECT *
+    FROM mi_policies
+    WHERE policy_status='ACTIVE';
+END $$
+
+DELIMITER ;
+
+-- 8. Claims Report
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_claim_report()
+BEGIN
+    SELECT *
+    FROM mi_claims;
+END $$
+
+DELIMITER ;
+
+-- 9. Payment Report
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_payment_report()
+BEGIN
+    SELECT *
+    FROM mi_payments;
+END $$
+
+DELIMITER ;
+
+-- 10. Renewal Report
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_renewal_report()
+BEGIN
+    SELECT *
+    FROM mi_renewals;
+END $$
+
+DELIMITER ;
+
+
+
+Functions (5)
+
+1. Total Premium
+
+DELIMITER $$
+
+CREATE FUNCTION fn_total_premium()
+RETURNS DECIMAL(15,2)
+DETERMINISTIC
+BEGIN
+   DECLARE total DECIMAL(15,2);
+
+   SELECT SUM(premium_amount)
+   INTO total
+   FROM mi_policies;
+
+   RETURN total;
+END $$
+
+DELIMITER ;
+
+2. Total Customers
+
+DELIMITER $$
+
+CREATE FUNCTION fn_total_customers()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+   DECLARE total INT;
+
+   SELECT COUNT(*)
+   INTO total
+   FROM mi_customers;
+
+   RETURN total;
+END $$
+
+DELIMITER ;
+
+3. Highest Claim
+
+DELIMITER $$
+
+CREATE FUNCTION fn_max_claim()
+RETURNS DECIMAL(15,2)
+DETERMINISTIC
+BEGIN
+   DECLARE max_claim DECIMAL(15,2);
+
+   SELECT MAX(claim_amount)
+   INTO max_claim
+   FROM mi_claims;
+
+   RETURN max_claim;
+END $$
+
+DELIMITER ;
+
+-- 4. Average Premium
+
+DELIMITER $$
+
+CREATE FUNCTION fn_avg_premium()
+RETURNS DECIMAL(15,2)
+DETERMINISTIC
+BEGIN
+   DECLARE avg_pre DECIMAL(15,2);
+
+   SELECT AVG(premium_amount)
+   INTO avg_pre
+   FROM mi_policies;
+
+   RETURN avg_pre;
+END $$
+
+DELIMITER ;
+
+5. Total Policies
+
+DELIMITER $$
+
+CREATE FUNCTION fn_total_policies()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+   DECLARE total INT;
+
+   SELECT COUNT(*)
+   INTO total
+   FROM mi_policies;
+
+   RETURN total;
+END $$
+
+DELIMITER ;
+
+-- Triggers (5)
+
+-- 1. Customer Insert Audit
+DELIMITER $$
+
+CREATE TRIGGER trg_customer_insert
+AFTER INSERT ON mi_customers
+FOR EACH ROW
+BEGIN
+   INSERT INTO mi_audit_logs
+   (table_name,action_type,user_name,remarks)
+   VALUES
+   ('mi_customers','INSERT','SYSTEM','Customer Added');
+END $$
+
+DELIMITER ;
+
+-- 2. Policy Insert Audit
+
+DELIMITER $$
+
+CREATE TRIGGER trg_policy_insert
+AFTER INSERT ON mi_policies
+FOR EACH ROW
+BEGIN
+   INSERT INTO mi_audit_logs
+   (table_name,action_type,user_name,remarks)
+   VALUES
+   ('mi_policies','INSERT','SYSTEM','Policy Added');
+END $$
+
+DELIMITER ;
+
+-- 3. Claim Insert Audit
+
+DELIMITER $$
+
+CREATE TRIGGER trg_claim_insert
+AFTER INSERT ON mi_claims
+FOR EACH ROW
+BEGIN
+   INSERT INTO mi_audit_logs
+   (table_name,action_type,user_name,remarks)
+   VALUES
+   ('mi_claims','INSERT','SYSTEM','Claim Added');
+END $$
+
+DELIMITER ;
+
+-- 4. Payment Insert Audit
+
+DELIMITER $$
+
+CREATE TRIGGER trg_payment_insert
+AFTER INSERT ON mi_payments
+FOR EACH ROW
+BEGIN
+   INSERT INTO mi_audit_logs
+   (table_name,action_type,user_name,remarks)
+   VALUES
+   ('mi_payments','INSERT','SYSTEM','Payment Added');
+END $$
+
+DELIMITER ;
+
+
+-- 5. Renewal Insert Audit
+
+DELIMITER $$
+
+
+CREATE TRIGGER trg_renewal_insert
+AFTER INSERT ON mi_renewals
+FOR EACH ROW
+BEGIN
+   INSERT INTO mi_audit_logs
+   (table_name,action_type,user_name,remarks)
+   VALUES
+   ('mi_renewals','INSERT','SYSTEM','Renewal Added');
+END $$
+
+DELIMITER ;
+
+-- Transaction Example
+
+-- COMMIT
+
+START TRANSACTION;
+
+UPDATE mi_policies
+SET premium_amount = premium_amount + 1000
+WHERE policy_id = 1;
+
+
+COMMIT;
+
+-- ROLLBACK
+
+
+START TRANSACTION;
+
+UPDATE mi_policies
+SET premium_amount = premium_amount + 5000
+WHERE policy_id = 2;
+
+ROLLBACK;
+
+-- SAVEPOINT
+
+
+START TRANSACTION;
+
+UPDATE mi_customers
+SET address='Chennai Updated'
+WHERE customer_id=1;
+
+SAVEPOINT sp1;
+
+UPDATE mi_customers
+SET address='Wrong Address'
+WHERE customer_id=2;
+
+ROLLBACK TO sp1;
+
+COMMIT;
+
+SELECT policy_status,
+       COUNT(*) AS total_policies
+FROM mi_policies
+GROUP BY policy_status;
+
+SELECT payment_mode,
+       SUM(amount) AS total_amount
+FROM mi_payments
+GROUP BY payment_mode;
+
+-- HAVING Queries
+
+SELECT payment_mode,
+       SUM(amount) total_amount
+FROM mi_payments
+GROUP BY payment_mode
+HAVING SUM(amount) > 50000;
+
+SELECT claim_status,
+       COUNT(*) total_claims
+FROM mi_claims
+GROUP BY claim_status
+HAVING COUNT(*) >= 1;
+
+-- CASE Statement
+
+SELECT policy_number,
+       premium_amount,
+       CASE
+           WHEN premium_amount >= 25000 THEN 'HIGH'
+           WHEN premium_amount >= 15000 THEN 'MEDIUM'
+           ELSE 'LOW'
+       END AS premium_category
+FROM mi_policies;
+
+-- DISTINCT
+
+SELECT DISTINCT payment_mode
+FROM mi_payments;
+
+-- BETWEEN
+
+SELECT *
+FROM mi_policies
+WHERE premium_amount BETWEEN 15000 AND 25000;
+
+-- LIKE
+
+SELECT *
+FROM mi_customers
+WHERE customer_name LIKE 'A%';
+
+SELECT *
+
+FROM mi_customers
+WHERE email LIKE '%gmail.com';
+
+-- ORDER BY
+
+SELECT *
+FROM mi_policies
+ORDER BY premium_amount DESC;
+
+SELECT *
+
+FROM mi_claims
+ORDER BY claim_amount ASC;
+
+-- EXISTS
+
+SELECT customer_name
+FROM mi_customers c
+WHERE EXISTS
+(
+   SELECT 1
+   FROM mi_quotes q
+   WHERE c.customer_id=q.customer_id
+);
+
+-- IN Operator
+
+SELECT *
+FROM mi_policies
+WHERE quote_id IN (1,2,3,4,5);
+
+-- ANY Operator
+
+SELECT *
+FROM mi_policies
+WHERE premium_amount > ANY
+(
+   SELECT premium_amount
+   FROM mi_policies
+   WHERE policy_id <= 5
+);
+
+-- ALL Operator
+
+SELECT *
+FROM mi_policies
+WHERE premium_amount > ALL
+(
+   SELECT premium_amount
+   FROM mi_policies
+   WHERE policy_id <= 5
+);
+
+-- LEFT JOIN
+
+SELECT c.customer_name,
+       v.registration_no
+FROM mi_customers c
+LEFT JOIN mi_vehicles v
+ON c.customer_id=v.customer_id;
+
+-- RIGHT JOIN
+
+SELECT c.customer_name,
+       v.registration_no
+FROM mi_customers c
+RIGHT JOIN mi_vehicles v
+ON c.customer_id=v.customer_id;
+
+-- View
+
+CREATE VIEW vw_customer_policy AS
+SELECT c.customer_name,
+       p.policy_number,
+       p.premium_amount
+FROM mi_customers c
+JOIN mi_quotes q
+ON c.customer_id=q.customer_id
+JOIN mi_policies p
+ON q.quote_id=p.quote_id;
+
+SELECT * FROM vw_customer_policy;
+
+
+-- Window Function Queries
+
+SELECT policy_number,
+       premium_amount,
+       ROW_NUMBER() OVER(ORDER BY premium_amount DESC) AS row_num
+FROM mi_policies;
+
+SELECT policy_number,
+       premium_amount,
+       RANK() OVER(ORDER BY premium_amount DESC) AS rank_no
+FROM mi_policies;
+
+SELECT policy_number,
+
+       premium_amount,
+       DENSE_RANK() OVER(ORDER BY premium_amount DESC) AS dense_rank_no
+FROM mi_policies;
+
+
+
+-- 1. PRIMARY KEY
+
+CREATE TABLE mi_regions (
+    region_id INT PRIMARY KEY,
+    region_name VARCHAR(100)
+);
+
+-- 2. NOT NULL
+
+CREATE TABLE mi_customers (
+    customer_id INT PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL,
+    mobile VARCHAR(15) NOT NULL
+);
+
+-- 3. UNIQUE
+
+CREATE TABLE mi_vehicles (
+    vehicle_id INT PRIMARY KEY,
+    registration_no VARCHAR(20) UNIQUE,
+    engine_no VARCHAR(50) UNIQUE
+);
+
+-- 4. DEFAULT
+
+CREATE TABLE mi_policies (
+    policy_id INT PRIMARY KEY,
+    policy_status VARCHAR(20)
+    DEFAULT 'ACTIVE'
+);
+
+-- 5. CHECK
+
+CREATE TABLE mi_claims (
+    claim_id INT PRIMARY KEY,
+    claim_amount DECIMAL(12,2),
+    CHECK (claim_amount > 0)
+);
+
+-- 6. FOREIGN KEY
+
+CREATE TABLE mi_states (
+    state_id INT PRIMARY KEY,
+    region_id INT,
+    state_name VARCHAR(100),
+    FOREIGN KEY (region_id)
+    REFERENCES mi_regions(region_id)
+);
+
+-- 7. AUTO_INCREMENT
+
+CREATE TABLE mi_roles (
+    role_id INT AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(50)
+);
+
+ALTER TABLE Constraints
+
+-- Add UNIQUEALTER TABLE mi_customers
+ADD CONSTRAINT uq_customer_email
+UNIQUE(email);
+
+-- Add CHECK
+
+ALTER TABLE mi_policies
+ADD CONSTRAINT chk_premium
+CHECK(premium_amount > 0);
+
+-- Add DEFAULT
+
+ALTER TABLE mi_claims
+ALTER claim_status
+SET DEFAULT 'PENDING';
+
+-- Add FOREIGN KEY
+
+ALTER TABLE mi_vehicles
+ADD CONSTRAINT fk_customer
+FOREIGN KEY(customer_id)
+REFERENCES mi_customers(customer_id);
+
+-- Enterprise-Level Constraint Example
+
+CREATE TABLE mi_customers(
+ customer_id INT AUTO_INCREMENT PRIMARY KEY,
+ customer_name VARCHAR(100) NOT NULL,
+ mobile VARCHAR(15) UNIQUE NOT NULL,
+ email VARCHAR(100) UNIQUE,
+ gender VARCHAR(10)
+ CHECK(gender IN ('Male','Female')),
+ created_date DATE DEFAULT (CURRENT_DATE)
+);
+
+-- 1. Customer Policy View
+
+CREATE VIEW vw_customer_policy AS
+SELECT
+    c.customer_id,
+    c.customer_name,
+    p.policy_number,
+    p.premium_amount,
+    p.policy_status
+FROM mi_customers c
+JOIN mi_quotes q
+ON c.customer_id = q.customer_id
+JOIN mi_policies p
+ON q.quote_id = p.quote_id;
+
+-- View data:
+
+SELECT * FROM vw_customer_policy;
+-- 2. Customer Vehicle View
+
+CREATE VIEW vw_customer_vehicle AS
+SELECT
+    c.customer_name,
+    v.registration_no,
+    v.make,
+    v.model
+FROM mi_customers c
+JOIN mi_vehicles v
+ON c.customer_id = v.customer_id;
+
+SELECT * FROM vw_customer_vehicle;
+
+-- 3. Payment Details View
+
+CREATE VIEW vw_payment_details AS
+SELECT
+    p.policy_number,
+    pay.amount,
+    pay.payment_date,
+    pay.payment_mode
+FROM mi_policies p
+JOIN mi_payments pay
+ON p.policy_id = pay.policy_id;
+SELECT * FROM vw_payment_details;
+
+-- 4. Claims Summary View
+
+CREATE VIEW vw_claim_summary AS
+SELECT
+    c.claim_id,
+    p.policy_number,
+    c.claim_amount,
+    c.approved_amount,
+    c.claim_status
+FROM mi_claims c
+JOIN mi_policies p
+ON c.policy_id = p.policy_id;
+SELECT * FROM vw_claim_summary;
+
+-- 5. Renewal Details View
+
+CREATE VIEW vw_renewal_details AS
+SELECT
+    p.policy_number,
+    r.renewal_date,
+    r.new_expiry_date,
+    r.renewal_status
+FROM mi_renewals r
+JOIN mi_policies p
+ON r.policy_id = p.policy_id;
+SELECT * FROM vw_renewal_details;
+
+-- View List
+
+SHOW FULL TABLES
+WHERE TABLE_TYPE = 'VIEW';
+
+-- Drop View
+
+DROP VIEW vw_customer_policy;
+
+SELECT * FROM mi_customers;
+
+ SELECT * FROM mi_vehicles;
+
+ SELECT * FROM mi_quotes;
+
+ SELECT * FROM mi_policies;
+
+ SELECT * FROM mi_payments;
+
+ SELECT * FROM mi_claims;
+
+ SELECT * FROM mi_surveyors;
+
+ SELECT * FROM mi_renewals;
+
+ SELECT customer_name,mobile FROM mi_customers;
+
+ SELECT policy_number,premium_amount FROM mi_policies;
+
+ SELECT * FROM mi_customers WHERE gender='Male';
+
+ SELECT * FROM mi_customers WHERE gender='Female';
+
+ SELECT * FROM mi_policies WHERE policy_status='ACTIVE';
+
+ SELECT * FROM mi_claims WHERE claim_status='APPROVED';
+
+ SELECT * FROM mi_payments WHERE payment_mode='UPI';
+
+ SELECT * FROM mi_customers ORDER BY customer_name;
+
+ SELECT * FROM mi_policies ORDER BY premium_amount DESC;
+
+ SELECT * FROM mi_claims ORDER BY claim_amount DESC;
+
+ SELECT DISTINCT payment_mode FROM mi_payments;
+
+ SELECT DISTINCT policy_status FROM mi_policies;
+
+-- Aggregate Functions (21–35)
+
+ SELECT COUNT(*) FROM mi_customers;
+
+ SELECT COUNT(*) FROM mi_policies;
+
+ SELECT COUNT(*) FROM mi_claims;
+
+ SELECT SUM(premium_amount) FROM mi_policies;
+
+
+ SELECT SUM(amount) FROM mi_payments;
+
+ SELECT AVG(premium_amount) FROM mi_policies;
+
+ SELECT AVG(claim_amount) FROM mi_claims;
+
+ SELECT MAX(premium_amount) FROM mi_policies;
+
+ SELECT MIN(premium_amount) FROM mi_policies;
+
+ SELECT MAX(claim_amount) FROM mi_claims;
+
+ SELECT MIN(claim_amount) FROM mi_claims;
+
+ SELECT COUNT(DISTINCT payment_mode) FROM mi_payments;
+
+ SELECT SUM(sum_insured) FROM mi_policies;
+
+ SELECT AVG(sum_insured) FROM mi_policies;
+
+ SELECT MAX(sum_insured) FROM mi_policies;
+
+-- WHERE, LIKE, BETWEEN (36–50)
+
+ SELECT * FROM mi_customers WHERE customer_name LIKE 'A%';
+
+ SELECT * FROM mi_customers WHERE email LIKE '%gmail.com';
+
+ SELECT * FROM mi_policies WHERE premium_amount BETWEEN 20000 AND 30000;
+
+ SELECT * FROM mi_claims WHERE claim_amount BETWEEN 50000 AND 100000;
+
+ SELECT * FROM mi_customers WHERE customer_id IN (1,2,3);
+
+ SELECT * FROM mi_policies WHERE policy_id IN (1,2,3);
+
+ SELECT * FROM mi_claims WHERE approved_amount > 50000;
+
+ SELECT * FROM mi_payments WHERE amount > 30000;
+
+
+
+ SELECT * FROM mi_customers WHERE customer_name LIKE '%Kumar';
+
+ SELECT * FROM mi_vehicles WHERE make='Hyundai';
+
+ SELECT * FROM mi_vehicles WHERE manufacturing_year=2023;
+
+ SELECT * FROM mi_quotes WHERE quote_status='APPROVED';
+
+ SELECT * FROM mi_renewals WHERE renewal_status='RENEWED';
+
+SELECT * FROM mi_users WHERE status='ACTIVE';
+
+
+SELECT policy_status,
+       COUNT(*) AS total_policies
+FROM mi_policies
+GROUP BY policy_status;
+
+-- 82. Payments GROUP BY Payment Mode
+
+SELECT payment_mode,
+       SUM(amount) AS total_payment
+FROM mi_payments
+GROUP BY payment_mode;
+
+-- 83. Claims GROUP BY Claim Status
+
+SELECT claim_status,
+       COUNT(*) AS total_claims
+FROM mi_claims
+GROUP BY claim_status;
+
+-- 84. Customers GROUP BY Gender
+
+SELECT gender,
+       COUNT(*) AS total_customers
+FROM mi_customers
+GROUP BY gender;
+
+-- 85. HAVING COUNT(*) > 1
+
+SELECT payment_mode,
+       COUNT(*) AS total_transactions
+FROM mi_payments
+GROUP BY payment_mode
+HAVING COUNT(*) > 1;
+
+-- 86. HAVING SUM(amount) > 50000
+
+SELECT payment_mode,
+       SUM(amount) AS total_amount
+FROM mi_payments
+GROUP BY payment_mode
+HAVING SUM(amount) > 50000;
+
+-- 87. HAVING AVG(premium_amount) > 15000
+
+SELECT policy_status,
+       AVG(premium_amount) AS avg_premium
+FROM mi_policies
+GROUP BY policy_status
+HAVING AVG(premium_amount) > 15000;
+
+-- 88. HAVING COUNT(policy_id) > 5
+
+SELECT policy_status,
+       COUNT(policy_id) AS total_policies
+FROM mi_policies
+GROUP BY policy_status
+HAVING COUNT(policy_id) > 5;
+
+-- 89. Vehicles GROUP BY Make
+
+SELECT make,
+       COUNT(*) AS total_vehicles
+FROM mi_vehicles
+GROUP BY make;
+
+-- 90. Vehicles GROUP BY Manufacturing Year
+
+SELECT manufacturing_year,
+       COUNT(*) AS total_vehicles
+FROM mi_vehicles
+GROUP BY manufacturing_year
+ORDER BY manufacturing_year;
+-- END $$
+--  DELINMITER ;
